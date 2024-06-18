@@ -11,10 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main branch code
+      - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          ref: main
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -25,7 +23,12 @@ jobs:
         run: npm install -g yarn
 
       - name: Install yarn dependencies for main branch
+        shell: bash
+        working-directory: ${{ env.WORKING_DIRECTORY }}
         run: yarn install
+
+      - name: Install dependencies
+        run: yarn build
 
       - name: Run tests on main branch
         run: yarn test --coverage
@@ -33,15 +36,22 @@ jobs:
           CI: true
 
       - name: Save coverage report from main branch
-        run: cp -r coverage coverage-main
-
-      - name: Checkout input branch code
+        run: |
+          mkdir -p coverage-main
+          cp -r coverage/* coverage-main/
+        
+      - name: Checkout input branch
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
 
       - name: Install yarn dependencies for input branch
+        shell: bash
+        working-directory: ${{ env.WORKING_DIRECTORY }}
         run: yarn install
+
+      - name: Install dependencies
+        run: yarn build
 
       - name: Run tests on input branch
         run: yarn test --coverage
@@ -49,7 +59,9 @@ jobs:
           CI: true
 
       - name: Save coverage report from input branch
-        run: cp -r coverage coverage-input
+        run: |
+          mkdir -p coverage-input
+          cp -r coverage/* coverage-input/
 
       - name: Compare coverage
         run: |
