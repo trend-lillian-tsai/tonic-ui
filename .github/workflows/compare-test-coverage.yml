@@ -24,8 +24,6 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: yarn install
 
-      - name: Install node modules
-        run: yarn run ci
       - name: Install dependencies
         run: yarn build
 
