@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install Yarn globally
+        run: npm install -g yarn
+        
       - name: Install yarn dependencies
         shell: bash
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -48,7 +51,7 @@ jobs:
         run: yarn test --coverage
         env:
           CI: true
-          
+
       - name: Save coverage report from input branch
         run: cp -r coverage coverage-input
 
