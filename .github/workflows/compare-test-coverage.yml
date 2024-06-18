@@ -38,7 +38,7 @@ jobs:
       - name: Save coverage report from main branch
         run: |
           mkdir -p coverage-main
-          cp -r packages/react/coverage/lcov-report coverage-main/
+          cp -r packages/react/coverage/coverage-summary.json coverage-main/
         
       - name: Checkout input branch
         uses: actions/checkout@v2
@@ -62,37 +62,22 @@ jobs:
       - name: Save coverage report from input branch
         run: |
           mkdir -p coverage-input
-          cp -r packages/react/coverage/lcov-report coverage-input/
+          cp -r packages/react/coverage/coverage-summary.json coverage-input/
 
       - name: Compare coverage
         run: |
-          # Extract and compare coverage rates
-          main_statements=$(grep -Po 'Statements\s+<span class="strong">\K[^%]+' coverage-main/lcov-report/index.html)
-          main_branches=$(grep -Po 'Branches\s+<span class="strong">\K[^%]+' coverage-main/lcov-report/index.html)
-          main_functions=$(grep -Po 'Functions\s+<span class="strong">\K[^%]+' coverage-main/lcov-report/index.html)
-          main_lines=$(grep -Po 'Lines\s+<span class="strong">\K[^%]+' coverage-main/lcov-report/index.html)
-          input_statements=$(grep -Po 'Statements\s+<span class="strong">\K[^%]+' coverage-input/lcov-report/index.html)
-          input_branches=$(grep -Po 'Branches\s+<span class="strong">\K[^%]+' coverage-input/lcov-report/index.html)
-          input_functions=$(grep -Po 'Functions\s+<span class="strong">\K[^%]+' coverage-input/lcov-report/index.html)
-          input_lines=$(grep -Po 'Lines\s+<span class="strong">\K[^%]+' coverage-input/lcov-report/index.html)
-          echo "Main branch coverage:"
-          echo "Statements: $main_statements%"
-          echo "Branches: $main_branches%"
-          echo "Functions: $main_functions%"
-          echo "Lines: $main_lines%"
-          echo "Input branch coverage:"
-          echo "Statements: $input_statements%"
-          echo "Branches: $input_branches%"
-          echo "Functions: $input_functions%"
-          echo "Lines: $input_lines%"
-          echo "Input branch coverage is equal or better than main branch"
-      # - name: Compare coverage
-      #   run: |
-      #     main_coverage=$(grep -Po 'All files.*?\K(\d+\.\d+%)' coverage-main/lcov-report/index.html)
-      #     input_coverage=$(grep -Po 'All files.*?\K(\d+\.\d+%)' coverage-input/lcov-report/index.html)
-      #     echo "Main branch coverage: $main_coverage"
-      #     echo "Input branch coverage: $input_coverage"
-      #     if (( $(echo "$input_coverage < $main_coverage" | bc -l) )); then
-      #       echo "Input branch coverage is lower than main branch"
-      #       exit 1
-      #     fi
+          main_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-main/coverage-summary.json)
+          input_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-input/coverage-summary.json)
+          
+          echo "Main branch coverage: $main_coverage"
+          echo "Input branch coverage: $input_coverage"
+
+          main_lines=$(echo $main_coverage | jq -r '.lines')
+          main_statements=$(echo $main_coverage | jq -r '.statements')
+          main_functions=$(echo $main_coverage | jq -r '.functions')
+          main_branches=$(echo $main_coverage | jq -r '.branches')
+
+          input_lines=$(echo $input_coverage | jq -r '.lines')
+          input_statements=$(echo $input_coverage | jq -r '.statements')
+          input_functions=$(echo $input_coverage | jq -r '.functions')
+          input_branches=$(echo $input_coverage | jq -r '.branches')
