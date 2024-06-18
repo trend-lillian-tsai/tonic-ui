@@ -18,6 +18,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 22
+
+      - name: install dependencies
+      shell: bash
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      if: steps.restore-dependencies.outputs.cache-hit != 'true'
+      run: yarn install
+
       - name: Install node modules
         run: yarn run ci
       - name: Install dependencies
@@ -36,3 +43,11 @@ jobs:
 
       - name: Run tests on main branch
         run: yarn test
+      - name: cache dependencies
+        if: steps.restore-dependencies.outputs.cache-hit != 'true'
+        id: cache-dependencies
+        uses: actions/cache/save@v3
+        with:
+          path: ${{ env.WORKING_DIRECTORY }}/node_modules
+          key: cache-dependencies-${{ hashFiles(format('{0}/yarn.lock', env.WORKING_DIRECTORY)) }}
+  
