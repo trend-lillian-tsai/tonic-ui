@@ -28,8 +28,9 @@ jobs:
         run: yarn build
 
       - name: Run tests on main branch
-        run: yarn test
-
+        run: yarn test --coverage
+        env:
+          CI: true
       - name: Checkout input branch
         uses: actions/checkout@v2
         with:
@@ -44,4 +45,20 @@ jobs:
         run: yarn build
 
       - name: Run tests on input branch
-        run: yarn test
+        run: yarn test --coverage
+        env:
+          CI: true
+          
+      - name: Save coverage report from input branch
+        run: cp -r coverage coverage-input
+
+      - name: Compare coverage
+        run: |
+          main_coverage=$(jq '.total.lines.pct' coverage-main/coverage-summary.json)
+          input_coverage=$(jq '.total.lines.pct' coverage-input/coverage-summary.json)
+          echo "Main branch coverage: $main_coverage%"
+          echo "Input branch coverage: $input_coverage%"
+          if (( $(echo "$input_coverage < $main_coverage" | bc -l) )); then
+            echo "Input branch coverage is lower than main branch"
+            exit 1
+          fi
