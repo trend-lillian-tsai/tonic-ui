@@ -19,8 +19,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Yarn globally
-        run: npm install -g yarn
+      # - name: Install Yarn globally
+      #   run: npm install -g yarn
 
       - name: Install yarn dependencies for main branch
         shell: bash
