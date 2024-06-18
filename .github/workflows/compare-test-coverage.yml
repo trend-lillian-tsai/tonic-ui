@@ -22,9 +22,17 @@ jobs:
       # - name: Install Yarn globally
       #   run: npm install -g yarn
 
+      - name: restore dependencies
+        id: restore-dependencies
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.WORKING_DIRECTORY }}/node_modules
+          key: cache-dependencies-${{ hashFiles(format('{0}/yarn.lock', env.WORKING_DIRECTORY)) }}
+
       - name: Install yarn dependencies for main branch
         shell: bash
         working-directory: ${{ env.WORKING_DIRECTORY }}
+        if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
 
       - name: Install dependencies
@@ -46,9 +54,17 @@ jobs:
           clean: false
           ref: ${{ github.event.inputs.branch }}
 
+      - name: restore dependencies
+        id: restore-dependencies
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.WORKING_DIRECTORY }}/node_modules
+          key: cache-dependencies-${{ hashFiles(format('{0}/yarn.lock', env.WORKING_DIRECTORY)) }}
+          
       - name: Install yarn dependencies for input branch
         shell: bash
         working-directory: ${{ env.WORKING_DIRECTORY }}
+        if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
 
       - name: Install dependencies
