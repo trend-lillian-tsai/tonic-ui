@@ -38,7 +38,7 @@ jobs:
       - name: Save coverage report from main branch
         run: |
           mkdir -p coverage-main
-          cp -r coverage/* coverage-main/
+          cp -r coverage/lcov-report coverage-main/
         
       - name: Checkout input branch
         uses: actions/checkout@v2
@@ -61,14 +61,14 @@ jobs:
       - name: Save coverage report from input branch
         run: |
           mkdir -p coverage-input
-          cp -r coverage/* coverage-input/
+          cp -r coverage/lcov-report coverage-input/
 
       - name: Compare coverage
         run: |
-          main_coverage=$(jq '.total.lines.pct' coverage-main/coverage-summary.json)
-          input_coverage=$(jq '.total.lines.pct' coverage-input/coverage-summary.json)
-          echo "Main branch coverage: $main_coverage%"
-          echo "Input branch coverage: $input_coverage%"
+          main_coverage=$(grep -Po 'All files.*?\K(\d+\.\d+%)' coverage-main/lcov-report/index.html)
+          input_coverage=$(grep -Po 'All files.*?\K(\d+\.\d+%)' coverage-input/lcov-report/index.html)
+          echo "Main branch coverage: $main_coverage"
+          echo "Input branch coverage: $input_coverage"
           if (( $(echo "$input_coverage < $main_coverage" | bc -l) )); then
             echo "Input branch coverage is lower than main branch"
             exit 1
