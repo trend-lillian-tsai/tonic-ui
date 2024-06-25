@@ -17,6 +17,7 @@ jobs:
           - react
           - react-base
           - react-docs
+          - react-hooks
           - react-icons
           - styled-system
           - theme
