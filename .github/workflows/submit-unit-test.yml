@@ -1,0 +1,25 @@
+name: 'Submit a unit test'
+
+on:
+  workflow_dispatch:
+    inputs:
+      data:
+        description: 'Test case data in JSON format'
+        required: true
+        default: '{}'
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  receive-test-case:
+    runs-on: ubuntu-latest
+    container:
+      image: node:18
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Pares test case data
+        id: parse-test-case
+        run: echo "${{ github.event.inputs.data }}"
+
