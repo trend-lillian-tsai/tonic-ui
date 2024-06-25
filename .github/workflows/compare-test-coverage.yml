@@ -9,6 +9,18 @@ on:
 jobs:
   compare-coverage:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: 
+          - codemode
+          - react
+          - react-base
+          - react-docs
+          - react-icons
+          - styled-system
+          - theme
+          - utils
 
     steps:
       - name: Checkout code
@@ -44,8 +56,8 @@ jobs:
 
       - name: Save coverage report from main branch
         run: |
-          mkdir -p coverage-main
-          cp -r packages/react/coverage/coverage-summary.json coverage-main/
+          mkdir -p coverage-main/${{ matrix.package }}
+          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
         
       - name: Checkout input branch
         uses: actions/checkout@v2
@@ -79,16 +91,17 @@ jobs:
 
       - name: Save coverage report from input branch
         run: |
-          mkdir -p coverage-input
-          cp -r packages/react/coverage/coverage-summary.json coverage-input/
+          mkdir -p coverage-input/${{ matrix.package }}
+          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-input/${{ matrix.package }}/
+
 
       - name: Compare coverage
         run: |
-          main_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-main/coverage-summary.json)
-          input_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-input/coverage-summary.json)
+          main_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-main/${{ matrix.package }}/coverage-summary.json)
+          input_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-input/${{ matrix.package }}/coverage-summary.json)
           
-          echo "Main branch coverage: $main_coverage"
-          echo "Input branch coverage: $input_coverage"
+          echo "${{ matrix.package }} Main branch coverage: $main_coverage"
+          echo "${{ matrix.package }} Input branch coverage: $input_coverage"
 
           main_lines=$(echo $main_coverage | jq -r '.lines')
           main_statements=$(echo $main_coverage | jq -r '.statements')
