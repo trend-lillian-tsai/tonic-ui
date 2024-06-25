@@ -3,7 +3,7 @@ name: 'Submit a unit test'
 on:
   push:
     branches:
-      - feautre/actions
+      - feature/actions
   workflow_dispatch:
     inputs:
       data:
