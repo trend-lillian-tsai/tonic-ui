@@ -1,9 +1,6 @@
 name: 'Submit a unit test'
 
 on:
-  push:
-    branches:
-      - feature/actions
   workflow_dispatch:
     inputs:
       data:
