@@ -106,8 +106,15 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Automated commit for test coverage comparison" || echo "No changes to commit"
+
+      - name: Check for differences between branches
+        id: check_diff
+        run: |
+          git fetch origin main
+          git diff --exit-code origin/main || echo "Differences found"
           
       - name: Compare coverage and create PR if input branch coverage is greater
+        if: steps.check_diff.outcome != 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
