@@ -100,28 +100,30 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gh
 
+      - name: Commit any changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Automated commit for test coverage comparison" || echo "No changes to commit"
+          
       - name: Compare coverage and create PR if input branch coverage is greater
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          main_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-main/${{ matrix.package }}/coverage-summary.json)
-          input_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-input/${{ matrix.package }}/coverage-summary.json)
+          main_coverage=$(jq '.total | {functions: .functions.pct}' coverage-main/${{ matrix.package }}/coverage-summary.json)
+          input_coverage=$(jq '.total | {functions: .functions.pct}' coverage-input/${{ matrix.package }}/coverage-summary.json)
           
-          echo "${{ matrix.package }} Main branch coverage: $main_coverage"
-          echo "${{ matrix.package }} Input branch coverage: $input_coverage"
-
-          main_lines=$(echo $main_coverage | jq -r '.lines')
-          main_statements=$(echo $main_coverage | jq -r '.statements')
           main_functions=$(echo $main_coverage | jq -r '.functions')
-          main_branches=$(echo $main_coverage | jq -r '.branches')
-
-          input_lines=$(echo $input_coverage | jq -r '.lines')
-          input_statements=$(echo $input_coverage | jq -r '.statements')
           input_functions=$(echo $input_coverage | jq -r '.functions')
-          input_branches=$(echo $input_coverage | jq -r '.branches')
+
+          echo "Package: ${{ matrix.package }}"
+          echo "Main branch function coverage: $main_functions"
+          echo "Input branch function coverage: $input_functions"
 
           if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
             echo "Function coverage in ${{ github.ref }} is greater than main. Creating a PR..."
+            gh auth setup-git
             gh pr create --title "Increase function coverage for ${{ matrix.package }}" --body "The function coverage rate for the ${{ github.ref }} branch (${input_functions}%) is greater than the main branch (${main_functions}%)." --base main --head ${{ github.ref }}
           else
             echo "Function coverage in ${{ github.ref }} is not greater than main. No PR created."
