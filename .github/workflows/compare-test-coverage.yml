@@ -100,13 +100,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gh
 
-      - name: Commit any changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Automated commit for test coverage comparison" || echo "No changes to commit"
-
       - name: Get default branch
         id: get_default_branch
         run: echo "::set-output name=default_branch::$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
@@ -116,7 +109,7 @@ jobs:
         run: |
           git fetch origin ${{ steps.get_default_branch.outputs.default_branch }}
           git diff --exit-code origin/${{ steps.get_default_branch.outputs.default_branch }} || echo "Differences found"
-          
+
       - name: Compare coverage and create PR if input branch coverage is greater
         if: steps.check_diff.outcome != 'success'
         env:
@@ -132,10 +125,10 @@ jobs:
           echo "Main branch function coverage: $main_functions"
           echo "Input branch function coverage: $input_functions"
 
-          if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
+          if (( $(echo "$input_functions > $main_functions" | bc -l) )); then
             echo "Function coverage in ${{ github.ref }} is greater than main. Creating a PR..."
             gh auth setup-git
-            gh pr create --title "Increase function coverage for ${{ matrix.package }}" --body "The function coverage rate for the ${{ github.ref }} branch (${input_functions}%) is greater than the main branch (${main_functions}%)." --base main --head ${{ github.ref }}
+            gh pr create --title "Increase function coverage for ${{ matrix.package }}" --body "The function coverage rate for the ${{ github.ref }} branch (${input_functions}%) is greater than the main branch (${main_functions}%)." --base ${{ steps.get_default_branch.outputs.default_branch }} --head ${{ github.ref }}
           else
             echo "Function coverage in ${{ github.ref }} is not greater than main. No PR created."
           fi
