@@ -100,7 +100,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gh
 
-      - name: Compare coverage
+      - name: Compare coverage and create PR if input branch coverage is greater
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           main_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-main/${{ matrix.package }}/coverage-summary.json)
           input_coverage=$(jq '.total | {lines: .lines.pct, statements: .statements.pct, functions: .functions.pct, branches: .branches.pct}' coverage-input/${{ matrix.package }}/coverage-summary.json)
