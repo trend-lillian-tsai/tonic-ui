@@ -107,11 +107,15 @@ jobs:
           git add .
           git commit -m "Automated commit for test coverage comparison" || echo "No changes to commit"
 
+      - name: Get default branch
+        id: get_default_branch
+        run: echo "::set-output name=default_branch::$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+
       - name: Check for differences between branches
         id: check_diff
         run: |
-          git fetch origin main
-          git diff --exit-code origin/main || echo "Differences found"
+          git fetch origin ${{ steps.get_default_branch.outputs.default_branch }}
+          git diff --exit-code origin/${{ steps.get_default_branch.outputs.default_branch }} || echo "Differences found"
           
       - name: Compare coverage and create PR if input branch coverage is greater
         if: steps.check_diff.outcome != 'success'
