@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/lillian
+      - '**'
 
 jobs:
   compare-coverage:
@@ -112,3 +112,15 @@ jobs:
           input_statements=$(echo $input_coverage | jq -r '.statements')
           input_functions=$(echo $input_coverage | jq -r '.functions')
           input_branches=$(echo $input_coverage | jq -r '.branches')
+
+          if (( $(echo "$input_functions > $main_functions" | bc -l) )); then
+            echo "Function coverage in ${{ github.ref }} is greater than main. Creating a PR..."
+            gh pr create --title "Increase function coverage for ${{ matrix.package }}" --body "The function coverage rate for the ${{ github.ref }} branch (${input_functions}%) is greater than the main branch (${main_functions}%)." --base main --head ${{ github.ref }}
+          else
+            echo "Function coverage in ${{ github.ref }} is not greater than main. No PR created."
+          fi
+
+      - name: Install GitHub CLI
+        uses: actions/setup-gh@v1
+        with:
+          version: latest
