@@ -115,9 +115,17 @@ jobs:
           echo "Input branch function coverage: $input_functions"
 
           if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
-            echo "Function coverage in ${{ github.ref }} is greater than main. Creating a PR..."
-            gh auth setup-git
-            gh pr create --title "Increase function coverage for ${{ matrix.package }}" --body "The function coverage rate for the ${{ github.ref }} branch (${input_functions}%) is greater than the main branch (${main_functions}%)." --base refs/heads/main --head ${{ github.ref }}
+            echo "Function coverage in ${{ github.ref }} is greater than main. Checking for changes and creating a PR..."
+            if git diff --quiet; then
+              echo "No changes to commit. Skipping PR creation."
+            else
+              git config --global user.name "github-actions[bot]"
+              git config --global user.email "github-actions[bot]@users.noreply.github.com"
+              git add .
+              git commit -m "Automated commit for test coverage comparison" || echo "No changes to commit"
+              gh auth setup-git
+              gh pr create --title "Increase function coverage for ${{ matrix.package }}" --body "The function coverage rate for the ${{ github.ref }} branch (${input_functions}%) is greater than the main branch (${main_functions}%)." --base refs/heads/main --head ${{ github.ref }}
+            fi
           else
             echo "Function coverage in ${{ github.ref }} is not greater than main. No PR created."
           fi
