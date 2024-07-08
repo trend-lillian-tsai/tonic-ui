@@ -102,7 +102,9 @@ jobs:
 
       - name: Get default branch
         id: get_default_branch
-        run: echo "::set-output name=default_branch::$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')"
+        run: |
+          default_branch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
+          echo "default_branch=$default_branch" >> $GITHUB_ENV
 
       - name: Check for differences between branches
         id: check_diff
