@@ -114,7 +114,7 @@ jobs:
           echo "Main branch function coverage: $main_functions"
           echo "Input branch function coverage: $input_functions"
 
-          if (( $(echo "$input_functions > $main_functions" | bc -l) )); then
+          if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
             echo "Function coverage in ${{ github.ref }} is greater than main. Creating a PR..."
             gh auth setup-git
             gh pr create --title "Increase function coverage for ${{ matrix.package }}" --body "The function coverage rate for the ${{ github.ref }} branch (${input_functions}%) is greater than the main branch (${main_functions}%)." --base refs/heads/main --head ${{ github.ref }}
