@@ -44,8 +44,6 @@ jobs:
         with:
           node-version: 22
 
-      # - name: Install Yarn globally
-      #   run: npm install -g yarn
       - name: restore dependencies
         id: restore-dependencies
         uses: actions/cache/restore@v3
