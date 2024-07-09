@@ -123,7 +123,6 @@ jobs:
   create-pr:
     needs: compare-coverage
     runs-on: ubuntu-latest
-    if: env.coverage_increase == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -134,6 +133,7 @@ jobs:
           sudo apt-get install -y gh
 
       - name: Create PR
+        if: steps.compare.outputs.coverage_increase == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
