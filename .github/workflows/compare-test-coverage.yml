@@ -133,9 +133,9 @@ jobs:
           sudo apt-get install -y gh
 
       - name: Create PR
-        if: steps.compare.outputs.coverage_increase == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo steps.compare.outputs.coverage_increase
           gh auth setup-git
           gh pr create --title "Increase function coverage" --body "One or more packages have increased function coverage." --base main --head ${{ github.ref }}
