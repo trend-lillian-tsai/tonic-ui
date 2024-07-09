@@ -119,7 +119,7 @@ jobs:
           echo "Base branch function coverage: $base_functions"
           echo "Compare branch function coverage: $compare_functions"
 
-          if (( $(echo "$compare_functions > $base_functions" | bc -l) )); then
+          if (( $(echo "$compare_functions >= $base_functions" | bc -l) )); then
             echo "::set-output name=coverage_increase::true"
             echo "Function coverage in ${{ github.event.inputs.compare_branch }} is greater than ${{ github.event.inputs.base_branch }} for package ${{ matrix.package }}."
           else
