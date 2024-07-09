@@ -1,6 +1,10 @@
 name: Compare Test Coverage
 
 on:
+  push:
+    branches:
+      - main
+      - '**'
   workflow_dispatch:
     inputs:
       base_branch:
