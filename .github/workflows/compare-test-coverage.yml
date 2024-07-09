@@ -100,13 +100,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gh
 
-      - name: Compare coverage and create PR if input branch coverage is greater
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compare coverage and set output
+        id: compare
         run: |
           main_coverage=$(jq '.total | {functions: .functions.pct}' coverage-main/${{ matrix.package }}/coverage-summary.json)
           input_coverage=$(jq '.total | {functions: .functions.pct}' coverage-input/${{ matrix.package }}/coverage-summary.json)
-          
+
           main_functions=$(echo $main_coverage | jq -r '.functions')
           input_functions=$(echo $input_coverage | jq -r '.functions')
 
@@ -115,17 +114,28 @@ jobs:
           echo "Input branch function coverage: $input_functions"
 
           if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
-            echo "Function coverage in ${{ github.ref }} is greater than main. Checking for changes and creating a PR..."
-            if git diff --quiet; then
-              echo "No changes to commit. Skipping PR creation."
-            else
-              git config --global user.name "github-actions[bot]"
-              git config --global user.email "github-actions[bot]@users.noreply.github.com"
-              git add .
-              git commit -m "Automated commit for test coverage comparison" || echo "No changes to commit"
-              gh auth setup-git
-              gh pr create --title "Increase function coverage for ${{ matrix.package }}" --body "The function coverage rate for the ${{ github.ref }} branch (${input_functions}%) is greater than the main branch (${main_functions}%)." --base refs/heads/main --head ${{ github.ref }}
-            fi
+            echo "coverage_increase=true" >> $GITHUB_ENV
+            echo "Function coverage in ${{ github.ref }} is greater than main for package ${{ matrix.package }}."
           else
-            echo "Function coverage in ${{ github.ref }} is not greater than main. No PR created."
+            echo "Function coverage in ${{ github.ref }} is not greater than main for package ${{ matrix.package }}."
           fi
+
+  create-pr:
+    needs: compare-coverage
+    runs-on: ubuntu-latest
+    if: env.coverage_increase == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Create PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh auth setup-git
+          gh pr create --title "Increase function coverage" --body "One or more packages have increased function coverage." --base main --head ${{ github.ref }}
