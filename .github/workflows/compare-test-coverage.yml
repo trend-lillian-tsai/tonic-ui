@@ -119,13 +119,17 @@ jobs:
 
           if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
             echo "coverage_increase=true" >> $GITHUB_ENV
+            echo "::set-output name=coverage_increase::true"
             echo "Function coverage in ${{ github.ref }} is greater than main for package ${{ matrix.package }}."
           else
+            echo "::set-output name=coverage_increase::false"
             echo "Function coverage in ${{ github.ref }} is not greater than main for package ${{ matrix.package }}."
           fi
+
   create-pr:
     needs: compare-coverage
     runs-on: ubuntu-latest
+    if: needs.compare-coverage.outputs.coverage_increase == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -136,7 +140,6 @@ jobs:
           sudo apt-get install -y gh
 
       - name: Create PR to merge
-        if: env.coverage_increase == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
