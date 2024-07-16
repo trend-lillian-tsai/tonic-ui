@@ -50,6 +50,16 @@ jobs:
             node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
 
+      - name: Run tests on main branch
+        run: yarn test --coverage
+        env:
+          CI: true
+
+      - name: Save coverage report from main branch
+        run: |
+          mkdir -p coverage-main/${{ matrix.package }}
+          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
+        
   compare-coverage:
     needs: setup
     if: github.ref != 'refs/heads/v2'
@@ -67,16 +77,6 @@ jobs:
           - theme
           - utils
     steps:
-      - name: Run tests on main branch
-        run: yarn test --coverage
-        env:
-          CI: true
-
-      - name: Save coverage report from main branch
-        run: |
-          mkdir -p coverage-main/${{ matrix.package }}
-          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
-        
       - name: Checkout compare branch
         uses: actions/checkout@v2
         with:
@@ -130,6 +130,18 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.compare-coverage.outputs.coverage_increase == 'true'
     steps:
+      - name: Check if coverage increased for any package
+        id: check-coverage
+        run: |
+          coverage_increased=false
+          for package in codemod react react-base react-docs react-hooks styled-system theme utils; do
+            if [[ "${{ needs.compare-coverage.outputs['coverage_increase_${package}'] }}" == "true" ]]; then
+              coverage_increased=true
+              break
+            fi
+          done
+          echo "coverage_increased=$coverage_increased" >> $GITHUB_ENV
+          
       - name: Checkout code
         uses: actions/checkout@v2
 
