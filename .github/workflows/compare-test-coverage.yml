@@ -76,6 +76,7 @@ jobs:
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
 
   compare-coverage:
+    needs: setup
     if: github.ref != 'refs/heads/v2'
     runs-on: ubuntu-latest
     strategy:
