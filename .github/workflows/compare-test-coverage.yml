@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: Run tests on base branch
         run: |
-            cd packages/${{ matrix.package }}
+            cd ./packages/${{ matrix.package }}
             yarn test --coverage
             mkdir -p ../../coverage-main/${{ matrix.package }}
             cp coverage/coverage-summary.json ../../coverage-main/${{ matrix.package }}/
@@ -91,7 +91,7 @@ jobs:
 
       - name: Run tests on compare branch
         run: |
-          cd packages/${{ matrix.package }}
+          cd ./packages/${{ matrix.package }}
           yarn test --coverage
           mkdir -p ../../coverage-input/${{ matrix.package }}
           cp coverage/coverage-summary.json ../../coverage-input/${{ matrix.package }}/
