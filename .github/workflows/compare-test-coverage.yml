@@ -121,6 +121,7 @@ jobs:
             echo "coverage_increase=true" >> $GITHUB_ENV
             echo "::set-output name=coverage_increase::true"
             echo "Function coverage in ${{ github.ref }} is greater than main for package ${{ matrix.package }}."
+          fi
 
   create-pr:
     needs: compare-coverage
