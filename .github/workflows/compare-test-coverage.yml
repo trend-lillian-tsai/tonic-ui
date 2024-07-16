@@ -57,7 +57,7 @@ jobs:
 
       - name: Save coverage report from main branch
         run: |
-          mkdir -p coverage-main/${{ matrix.package }}
+          mkdir -p coverage-main
           cp -r packages/*/coverage/coverage-summary.json coverage-main/
         
   compare-coverage:
