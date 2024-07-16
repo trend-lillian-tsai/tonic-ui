@@ -67,12 +67,13 @@ jobs:
           - theme
           - utils
     steps:
-      - name: Run tests on main branch
-        run: |
-          yarn test --coverage
-          mkdir -p coverage-main/${{ matrix.package }}
-          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
-        
+      - name: Run tests on base branch
+          run: |
+            cd packages/${{ matrix.package }}
+            yarn test --coverage
+            mkdir -p ../../coverage-main/${{ matrix.package }}
+            cp coverage/coverage-summary.json ../../coverage-main/${{ matrix.package }}/
+
       - name: Checkout compare branch
         uses: actions/checkout@v2
         with:
@@ -88,11 +89,12 @@ jobs:
       - name: Install dependencies
         run: yarn build
 
-      - name: Run tests and save coverage
+      - name: Run tests on compare branch
         run: |
+          cd packages/${{ matrix.package }}
           yarn test --coverage
-          mkdir -p coverage-input/${{ matrix.package }}
-          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-input/${{ matrix.package }}/
+          mkdir -p ../../coverage-input/${{ matrix.package }}
+          cp coverage/coverage-summary.json ../../coverage-input/${{ matrix.package }}/
 
       - name: Compare coverage and set output
         id: compare
@@ -115,7 +117,6 @@ jobs:
   create-pr:
     needs: compare-coverage
     runs-on: ubuntu-latest
-    if: needs.compare-coverage.outputs.coverage_increase == 'true'
     steps:
       - name: Check if coverage increased for any package
         id: check-coverage
@@ -138,6 +139,7 @@ jobs:
           sudo apt-get install -y gh
 
       - name: Create PR to merge
+        if: env.coverage_increased == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
