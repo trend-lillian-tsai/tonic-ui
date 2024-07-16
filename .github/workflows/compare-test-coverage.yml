@@ -13,22 +13,8 @@ on:
         default: '**'
 
 jobs:
-  compare-coverage:
-    if: github.ref != 'refs/heads/v2'
+  setup:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        package: 
-          - codemod
-          - react
-          - react-base
-          - react-docs
-          - react-hooks
-          - styled-system
-          - theme
-          - utils
-
     steps:
       - name: Checkout base branch
         uses: actions/checkout@v2
@@ -89,6 +75,22 @@ jobs:
             node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
 
+  compare-coverage:
+    if: github.ref != 'refs/heads/v2'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: 
+          - codemod
+          - react
+          - react-base
+          - react-docs
+          - react-hooks
+          - styled-system
+          - theme
+          - utils
+    steps:
       - name: Run tests on input branch
         run: yarn test --coverage
         env:
