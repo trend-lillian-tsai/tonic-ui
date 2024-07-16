@@ -58,7 +58,7 @@ jobs:
       - name: Save coverage report from main branch
         run: |
           mkdir -p coverage-main/${{ matrix.package }}
-          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
+          cp -r packages/*/coverage/coverage-summary.json coverage-main/
         
   compare-coverage:
     needs: setup
@@ -141,7 +141,7 @@ jobs:
             fi
           done
           echo "coverage_increased=$coverage_increased" >> $GITHUB_ENV
-          
+
       - name: Checkout code
         uses: actions/checkout@v2
 
