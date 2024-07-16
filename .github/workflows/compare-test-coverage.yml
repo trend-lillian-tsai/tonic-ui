@@ -68,7 +68,7 @@ jobs:
           - utils
     steps:
       - name: Run tests on base branch
-          run: |
+        run: |
             cd packages/${{ matrix.package }}
             yarn test --coverage
             mkdir -p ../../coverage-main/${{ matrix.package }}
