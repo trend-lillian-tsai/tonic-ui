@@ -71,7 +71,8 @@ jobs:
             .venv
             node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
-        
+          restore-keys: |
+            cache-dependencies-
   compare-coverage:
     needs: setup
     if: github.ref != 'refs/heads/v2'
@@ -101,6 +102,12 @@ jobs:
         with:
           clean: false
           ref: ${{ github.event.inputs.branch }}
+
+      - name: Install yarn dependencies for main branch
+        shell: bash
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        if: steps.restore-dependencies.outputs.cache-hit != 'true'
+        run: yarn install
 
       - name: Install dependencies
         run: yarn build
