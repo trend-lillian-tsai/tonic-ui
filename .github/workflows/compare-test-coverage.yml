@@ -48,7 +48,7 @@ jobs:
       - name: Save coverage report from main branch
         run: |
           mkdir -p coverage-main
-          cp packages/*/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
+          cp packages/*/coverage/coverage-summary.json coverage-main/*/
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v2
@@ -64,7 +64,6 @@ jobs:
           path: |
             .venv
             node_modules
-            coverage-main
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
         
   compare-coverage:
