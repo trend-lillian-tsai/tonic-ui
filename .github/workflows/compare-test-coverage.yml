@@ -48,7 +48,13 @@ jobs:
       - name: Save coverage report from main branch
         run: |
           mkdir -p coverage-main
-          cp packages/*/coverage/coverage-summary.json coverage-main/*/
+          for dir in packages/*/coverage; do
+            if [ -d "$dir" ]; then
+              package=$(basename $(dirname $dir))
+              mkdir -p coverage-main/$package
+              cp $dir/coverage-summary.json coverage-main/$package/
+            fi
+          done
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v2
