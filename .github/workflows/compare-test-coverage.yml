@@ -146,6 +146,13 @@ jobs:
             echo "COVERAGE_INCREASE_${{ matrix.package }}=true" >> $GITHUB_ENV
           fi
 
+  create-pr:
+    needs: compare-coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Check if coverage increased for any package
         id: check-coverage
         run: |
@@ -159,20 +166,13 @@ jobs:
           echo "coverage_increased=$coverage_increased" >> $GITHUB_ENV
           echo "coverage_increased=$coverage_increased"
 
-  create-pr:
-    needs: compare-coverage
-    runs-on: ubuntu-latest
-    if: env.coverage_increased == 'true'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
       - name: Install GitHub CLI
         run: |
           sudo apt-get update
           sudo apt-get install -y gh
 
       - name: Create PR to merge
+        if: env.coverage_increased == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
