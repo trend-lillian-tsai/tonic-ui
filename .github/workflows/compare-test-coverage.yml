@@ -142,7 +142,7 @@ jobs:
 
           if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
             echo "Function coverage in ${{ github.ref }} is greater or equal than main for package ${{ matrix.package }}."
-            echo "COVERAGE_INCREASE_${{ matrix.package }}=true" >> $GITHUB_ENV
+            echo "coverage_increase_${{ matrix.package }}=true" >> coverage_increase_flags.txt
           fi
 
   create-pr:
@@ -157,7 +157,7 @@ jobs:
         run: |
           coverage_increased=false
           for package in codemod react react-base react-hooks styled-system theme utils; do
-            if [[ "${!COVERAGE_INCREASE_${package}}" == "true" ]]; then
+            if grep -q "coverage_increase_${package}=true" coverage_increase_flags.txt; then
               coverage_increased=true
               break
             fi
