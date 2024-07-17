@@ -146,34 +146,23 @@ jobs:
             echo "::set-output name=coverage_increase_${{ matrix.package }}::true"
           fi
 
-  create-pr:
-    needs: compare-coverage
-    runs-on: ubuntu-latest
-    steps:
       - name: Check if coverage increased for any package
         id: check-coverage
         run: |
           coverage_increased=false
-          if [[ "${{ needs.compare-coverage.outputs['coverage_increase_codemod'] }}" == "true" ]]; then
-            coverage_increased=true
-          elif [[ "${{ needs.compare-coverage.outputs['coverage_increase_react'] }}" == "true" ]]; then
-            coverage_increased=true
-          elif [[ "${{ needs.compare-coverage.outputs['coverage_increase_react-base'] }}" == "true" ]]; then
-            coverage_increased=true
-          elif [[ "${{ needs.compare-coverage.outputs['coverage_increase_react-docs'] }}" == "true" ]]; then
-            coverage_increased=true
-          elif [[ "${{ needs.compare-coverage.outputs['coverage_increase_react-hooks'] }}" == "true" ]]; then
-            coverage_increased=true
-          elif [[ "${{ needs.compare-coverage.outputs['coverage_increase_styled-system'] }}" == "true" ]]; then
-            coverage_increased=true
-          elif [[ "${{ needs.compare-coverage.outputs['coverage_increase_theme'] }}" == "true" ]]; then
-            coverage_increased=true
-          elif [[ "${{ needs.compare-coverage.outputs['coverage_increase_utils'] }}" == "true" ]]; then
-            coverage_increased=true
-          fi
+          for package in codemod react react-base react-docs react-hooks styled-system theme utils; do
+            if [[ "${{ env.coverage_increase_${package} }}" == "true" ]]; then
+              echo "Coverage increased for $package"
+              coverage_increased=true
+              break
+            fi
+          done
           echo "coverage_increased=$coverage_increased" >> $GITHUB_ENV
-          echo "coverage_increased=$coverage_increased"
 
+  create-pr:
+    needs: compare-coverage
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
