@@ -143,26 +143,26 @@ jobs:
 
           if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
             echo "Function coverage in ${{ github.ref }} is greater or equal than main for package ${{ matrix.package }}."
-            coverage_increased=true
+            echo "COVERAGE_INCREASE_${{ matrix.package }}=true" >> $GITHUB_ENV
           fi
-
-          echo "coverage_increase_${{ matrix.package }}=$coverage_increased" >> $GITHUB_ENV
 
       - name: Check if coverage increased for any package
         id: check-coverage
         run: |
           coverage_increased=false
           for package in codemod react react-base react-docs react-hooks styled-system theme utils; do
-            if [ "$(eval echo \$coverage_increase_${package})" == "true" ]; then
+            if [[ "${{ env.COVERAGE_INCREASE_${package} }}" == "true" ]]; then
               coverage_increased=true
               break
             fi
           done
           echo "coverage_increased=$coverage_increased" >> $GITHUB_ENV
+          echo "coverage_increased=$coverage_increased"
 
   create-pr:
     needs: compare-coverage
     runs-on: ubuntu-latest
+    if: env.coverage_increased == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -173,7 +173,6 @@ jobs:
           sudo apt-get install -y gh
 
       - name: Create PR to merge
-        if: env.coverage_increased == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
