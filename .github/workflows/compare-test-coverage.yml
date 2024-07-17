@@ -36,7 +36,26 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
-        
+
+      - name: Install dependencies
+        run: yarn build
+
+      - name: Run tests on main branch
+        run: yarn test --coverage
+        env:
+          CI: true
+
+      - name: Save coverage report from main branch
+        run: |
+          mkdir -p coverage-main/${{ matrix.package }}
+          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-main
+          path: coverage-main
+
       - name: cache dependencies
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         id: cache-dependencies
@@ -45,6 +64,7 @@ jobs:
           path: |
             .venv
             node_modules
+            coverage-main
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
         
   compare-coverage:
@@ -64,28 +84,12 @@ jobs:
           - theme
           - utils
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v2
-
       - name: restore dependencies
         id: restore-dependencies
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.WORKING_DIRECTORY }}/node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
-
-      - name: Install dependencies
-        run: yarn build
-
-      - name: Run tests on main branch
-        run: yarn test --coverage
-        env:
-          CI: true
-
-      - name: Save coverage report from main branch
-        run: |
-          mkdir -p coverage-main/${{ matrix.package }}
-          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
 
       - name: Checkout compare branch
         uses: actions/checkout@v2
@@ -106,6 +110,12 @@ jobs:
           mkdir -p coverage-input/${{ matrix.package }}
           cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-input/${{ matrix.package }}/
 
+      - name: Download coverage report
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-main
+          path: coverage-main
+          
       - name: Compare coverage and set output
         id: compare
         run: |
