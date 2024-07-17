@@ -37,9 +37,6 @@ jobs:
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
 
-      - name: Install dependencies
-        run: yarn build
-
       - name: cache dependencies
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         id: cache-dependencies
@@ -67,12 +64,18 @@ jobs:
           - theme
           - utils
     steps:
-      - name: Run tests on base branch
+      - name: Install dependencies
+        run: yarn build
+
+      - name: Run tests on main branch
+        run: yarn test --coverage
+        env:
+          CI: true
+
+      - name: Save coverage report from main branch
         run: |
-            cd ./packages/${{ matrix.package }}
-            yarn test --coverage
-            mkdir -p ../../coverage-main/${{ matrix.package }}
-            cp coverage/coverage-summary.json ../../coverage-main/${{ matrix.package }}/
+          mkdir -p coverage-main/${{ matrix.package }}
+          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-main/${{ matrix.package }}/
 
       - name: Checkout compare branch
         uses: actions/checkout@v2
@@ -89,12 +92,15 @@ jobs:
       - name: Install dependencies
         run: yarn build
 
-      - name: Run tests on compare branch
+      - name: Run tests on input branch
+        run: yarn test --coverage
+        env:
+          CI: true
+
+      - name: Save coverage report from input branch
         run: |
-          cd ./packages/${{ matrix.package }}
-          yarn test --coverage
-          mkdir -p ../../coverage-input/${{ matrix.package }}
-          cp coverage/coverage-summary.json ../../coverage-input/${{ matrix.package }}/
+          mkdir -p coverage-input/${{ matrix.package }}
+          cp packages/${{ matrix.package }}/coverage/coverage-summary.json coverage-input/${{ matrix.package }}/
 
       - name: Compare coverage and set output
         id: compare
