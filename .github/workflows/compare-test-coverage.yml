@@ -156,6 +156,7 @@ jobs:
           coverage_increased=false
           for package in codemod react react-base react-docs react-hooks styled-system theme utils; do
             if [ "${{ needs.compare-coverage.outputs['coverage_increase_'${package}] }}" == "true" ]; then
+              echo "coverage_increase_'${package}'=true"
               coverage_increased=true
               break
             fi
