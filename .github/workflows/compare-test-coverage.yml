@@ -36,7 +36,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
-
+        
       - name: cache dependencies
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         id: cache-dependencies
@@ -64,6 +64,13 @@ jobs:
           - theme
           - utils
     steps:
+      - name: restore dependencies
+        id: restore-dependencies
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.WORKING_DIRECTORY }}/node_modules
+          key: cache-dependencies-${{ hashFiles('yarn.lock') }}
+
       - name: Install dependencies
         run: yarn build
 
@@ -83,11 +90,12 @@ jobs:
           clean: false
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Install yarn dependencies for input branch
-        shell: bash
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        if: steps.restore-dependencies.outputs.cache-hit != 'true'
-        run: yarn install
+      - name: restore dependencies
+        id: restore-dependencies
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{ env.WORKING_DIRECTORY }}/node_modules
+          key: cache-dependencies-${{ hashFiles('yarn.lock') }}
 
       - name: Install dependencies
         run: yarn build
