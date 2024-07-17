@@ -155,13 +155,13 @@ jobs:
         run: |
           coverage_increased=false
           for package in codemod react react-base react-docs react-hooks styled-system theme utils; do
-            if [ "${{ needs.compare-coverage.outputs['coverage_increase_'${package}] }}" == "true" ]; then
-              echo "coverage_increase_'${package}'=true"
+            if [[ "${{ needs.compare-coverage.outputs['coverage_increase_'${package}] }}" == "true" ]]; then
               coverage_increased=true
               break
             fi
           done
           echo "coverage_increased=$coverage_increased" >> $GITHUB_ENV
+          echo "coverage_increased=$coverage_increased"
 
       - name: Checkout code
         uses: actions/checkout@v2
