@@ -90,18 +90,18 @@ jobs:
           - theme
           - utils
     steps:
+      - name: Checkout compare branch
+        uses: actions/checkout@v2
+        with:
+          clean: false
+          ref: ${{ github.event.inputs.branch }}
+
       - name: restore dependencies
         id: restore-dependencies
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.WORKING_DIRECTORY }}/node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
-
-      - name: Checkout compare branch
-        uses: actions/checkout@v2
-        with:
-          clean: false
-          ref: ${{ github.event.inputs.branch }}
 
       - name: Install yarn dependencies for main branch
         shell: bash
