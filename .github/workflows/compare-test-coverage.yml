@@ -140,7 +140,7 @@ jobs:
           echo "Main branch function coverage: $main_functions"
           echo "Input branch function coverage: $input_functions"
 
-          if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
+          if (( $(echo "$input_functions > $main_functions" | bc -l) )); then
             echo "Function coverage in ${{ github.ref }} is greater or equal than main for package ${{ matrix.package }}."
             echo "COVERAGE_INCREASE_${{ matrix.package }}=true" >> coverage_increase_flags.txt
           fi
