@@ -37,7 +37,7 @@ jobs:
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
 
-      - name: Install dependencies
+      - name: yarn build
         run: yarn build
 
       - name: Run tests on main branch
@@ -72,7 +72,7 @@ jobs:
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
           restore-keys: |
             cache-dependencies-
-            
+
   compare-coverage:
     needs: setup
     if: github.ref != 'refs/heads/v2'
@@ -103,13 +103,13 @@ jobs:
             node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
 
-      - name: Install yarn dependencies for main branch
+      - name: Install yarn dependencies for input branch
         shell: bash
         working-directory: ${{ env.WORKING_DIRECTORY }}
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
 
-      - name: Install dependencies
+      - name: yarn build
         run: yarn build
 
       - name: Run tests on input branch
