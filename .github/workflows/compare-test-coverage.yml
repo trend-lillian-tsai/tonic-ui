@@ -127,7 +127,7 @@ jobs:
           name: coverage-main
           path: coverage-main
 
-      - name: Compare coverage and set output
+      - name: Compare coverage and set environment variable
         id: compare
         run: |
           main_coverage=$(jq '.total | {functions: .functions.pct}' coverage-main/${{ matrix.package }}/coverage-summary.json)
@@ -142,8 +142,7 @@ jobs:
 
           if (( $(echo "$input_functions >= $main_functions" | bc -l) )); then
             echo "Function coverage in ${{ github.ref }} is greater or equal than main for package ${{ matrix.package }}."
-            echo "coverage_increase_${{ matrix.package }}=true" >> coverage_increase_flags.txt
-          fi
+            echo "COVERAGE_INCREASE_${{ matrix.package }}=true" >> $GITHUB_ENV
 
   create-pr:
     needs: compare-coverage
@@ -153,11 +152,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check if coverage increased for any package
-        id: check-coverage
         run: |
           coverage_increased=false
-          for package in codemod react react-base react-hooks styled-system theme utils; do
-            if grep -q "coverage_increase_${package}=true" coverage_increase_flags.txt; then
+          for package in codemod react react-base react-docs react-hooks styled-system theme utils; do
+            if [[ "${!COVERAGE_INCREASE_${package}}" == "true" ]]; then
               coverage_increased=true
               break
             fi
