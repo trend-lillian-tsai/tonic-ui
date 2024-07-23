@@ -24,12 +24,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: restore dependencies
+      - name: Restore dependencies
         id: restore-dependencies
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.WORKING_DIRECTORY }}/node_modules
-          key: cache-dependencies-${{ hashFiles('yarn.lock') }}
+          key: cache-dependencies-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install yarn dependencies for main branch
         shell: bash
@@ -97,12 +97,12 @@ jobs:
           clean: false
           ref: ${{ github.event.inputs.branch }}
 
-      - name: restore dependencies
+      - name: Restore dependencies
         id: restore-dependencies
         uses: actions/cache/restore@v3
         with:
           path: ${{ env.WORKING_DIRECTORY }}/node_modules
-          key: cache-dependencies-${{ hashFiles('yarn.lock') }}
+          key: cache-dependencies-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install yarn dependencies for main branch
         shell: bash
