@@ -145,6 +145,15 @@ jobs:
             echo "COVERAGE_INCREASE_${{ matrix.package }}=true" >> $GITHUB_OUTPUT
             echo COVERAGE_INCREASE_${{ matrix.package }}=$COVERAGE_INCREASE_${{ matrix.package }}
           fi
+    outputs:
+      codemod: ${{ steps.output.outputs.COVERAGE_INCREASE_codemod }}
+      react: ${{ steps.output.outputs.COVERAGE_INCREASE_react }}
+      react-base: ${{ steps.output.outputs.COVERAGE_INCREASE_react-base }}
+      react-hooks: ${{ steps.output.outputs.COVERAGE_INCREASE_react-hooks }}
+      styled-system: ${{ steps.output.outputs.COVERAGE_INCREASE_styled-system }}
+      theme: ${{ steps.output.outputs.COVERAGE_INCREASE_theme }}
+      utils: ${{ steps.output.outputs.COVERAGE_INCREASE_utils }}
+      
   create-pr:
     needs: compare-coverage
     runs-on: ubuntu-latest
@@ -156,7 +165,7 @@ jobs:
         run: |
           coverage_increased=false
           for package in codemod react react-base react-hooks styled-system theme utils; do
-            if [[ needs.compare-coverage.outputs.COVERAGE_INCREASE_${package} == "true" ]]; then
+           if [[ "${{ needs.compare-coverage.outputs[$package] }}" == "true" ]]; then
               coverage_increased=true
               break
             fi
