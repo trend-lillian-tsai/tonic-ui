@@ -36,14 +36,16 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
-
+        
       - name: Install dependencies
         run: yarn build
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Run tests on main branch
         run: yarn test --coverage
         env:
           CI: true
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Save coverage report from main branch
         run: |
@@ -71,7 +73,8 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-            cache-dependencies-${{ hashFiles('yarn.lock') }}
+            cache-dependencies-
+
   compare-coverage:
     needs: setup
     if: github.ref != 'refs/heads/v2'
@@ -109,11 +112,13 @@ jobs:
 
       - name: Install dependencies
         run: yarn build
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Run tests on input branch
         run: yarn test --coverage
         env:
           CI: true
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Save coverage report from input branch
         run: |
