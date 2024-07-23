@@ -68,11 +68,10 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: |
-            .venv
-            node_modules
+            ${{ env.WORKING_DIRECTORY }}/node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-            cache-dependencies-
+            cache-dependencies-${{ hashFiles('yarn.lock') }}
   compare-coverage:
     needs: setup
     if: github.ref != 'refs/heads/v2'
