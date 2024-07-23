@@ -24,28 +24,26 @@ jobs:
         with:
           node-version: 22
 
-      - name: Restore dependencies
+      - name: restore dependencies
         id: restore-dependencies
         uses: actions/cache/restore@v3
         with:
-          path: ${{ env.WORKING_DIRECTORY }}/node_modules
-          key: cache-dependencies-${{ hashFiles('**/yarn.lock') }}
+          path: |
+            node_modules
+          key: cache-dependencies-${{ hashFiles('yarn.lock') }}
 
       - name: Install yarn dependencies for main branch
         shell: bash
-        working-directory: ${{ env.WORKING_DIRECTORY }}
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         run: yarn install
-        
+
       - name: Install dependencies
         run: yarn build
-        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Run tests on main branch
         run: yarn test --coverage
         env:
           CI: true
-        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Save coverage report from main branch
         run: |
@@ -70,11 +68,11 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: |
-            ${{ env.WORKING_DIRECTORY }}/node_modules
+            node_modules
           key: cache-dependencies-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-              cache-dependencies-
-
+            cache-dependencies-
+            
   compare-coverage:
     needs: setup
     if: github.ref != 'refs/heads/v2'
@@ -101,10 +99,9 @@ jobs:
         id: restore-dependencies
         uses: actions/cache/restore@v3
         with:
-          path: ${{ env.WORKING_DIRECTORY }}/node_modules
-          key: cache-dependencies-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-              cache-dependencies-
+          path: |
+            node_modules
+          key: cache-dependencies-${{ hashFiles('yarn.lock') }}
 
       - name: Install yarn dependencies for main branch
         shell: bash
@@ -114,13 +111,11 @@ jobs:
 
       - name: Install dependencies
         run: yarn build
-        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Run tests on input branch
         run: yarn test --coverage
         env:
           CI: true
-        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Save coverage report from input branch
         run: |
