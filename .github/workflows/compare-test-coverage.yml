@@ -148,10 +148,10 @@ jobs:
         continue-on-error: true
 
       - name: Upload coverage increase flags
-          uses: actions/upload-artifact@v3
-          with:
-            name: coverage_increase_flags
-            path: coverage_increase_flags.txt
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage_increase_flags
+          path: coverage_increase_flags.txt
           
   create-pr:
     needs: compare-coverage
@@ -164,7 +164,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage_increase_flags
-          
+
       - name: Check if coverage increased for any package
         id: check-coverage
         run: |
