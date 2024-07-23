@@ -146,11 +146,11 @@ jobs:
           fi
         continue-on-error: true
 
-     - name: Upload coverage increase flags
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage_increase_flags
-          path: coverage_increase_flags.txt
+      - name: Upload coverage increase flags
+          uses: actions/upload-artifact@v3
+          with:
+            name: coverage_increase_flags
+            path: coverage_increase_flags.txt
           
   create-pr:
     needs: compare-coverage
